@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Random;
 
 public class Simulator {
 	
@@ -54,25 +55,24 @@ public class Simulator {
 	private void processEvent(Event e) {
 		for(StatoTuristi st : this.statiTuristi.values()) {
 			if(st.getTuristi() > 0) {
-				System.out.println(st.getTuristi());
 				List<Adiacenza> vicini = this.model.getAdicenze(st.getState());
 				Integer somma = 0;
 				for(Adiacenza a : vicini)
 					somma += a.getPeso();
 				
-				Map<String, Double> probabilita = new HashMap<>();
-				for(Adiacenza a : vicini) {
-					probabilita.put(a.getState2(), ((double) (a.getPeso())/((double) somma)));
+				Random r = new Random();
+				Integer numTuristi = st.getTuristi();
+				for(int i = 0; i < numTuristi; i++) {
+					Double prob = r.nextDouble()*somma;
+					Integer cumulata = 0;
+					Integer key = -1;
+					while(cumulata < prob) {
+						key++;
+						cumulata += vicini.get(key).getPeso();
+					}
+					this.statiTuristi.get(vicini.get(key).getState2()).increaseTuristi();
+					st.decreaseTuristi();
 				}
-					
-				Integer spostati = 0;
-				for(String key : probabilita.keySet()) {
-					Integer qui = (int) (probabilita.get(key)*st.getTuristi());
-					this.statiTuristi.get(key).increaseTuristi(qui);
-					spostati += qui;
-				}
-				
-				st.decreaseTuristi(spostati);
 			}	
 		}
 	}
