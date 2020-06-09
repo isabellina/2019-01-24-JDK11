@@ -5,9 +5,12 @@
 package it.polito.tdp.extflightdelays;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.extflightdelays.model.Adiacenza;
 import it.polito.tdp.extflightdelays.model.Model;
+import it.polito.tdp.extflightdelays.model.StatoTuristi;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -47,17 +50,61 @@ public class ExtFlightDelaysController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-
+    	txtResult.clear();
+    	List<String> vertex = this.model.buildGrah();
+    	cmbBoxStati.getItems().setAll(vertex);
+    	
+    	txtResult.appendText(String.format("Grafo creato!\nVertici: %d\nArchi: %d\n", this.model.getNumVertex(), this.model.getNumEdge()));
     }
 
     @FXML
     void doSimula(ActionEvent event) {
-
+    	txtResult.clear();
+    	String state = cmbBoxStati.getValue();
+    	if(state == null) {
+    		txtResult.appendText("Selezionare uno stato!");
+    		return;
+    	}
+    	
+    	Integer T = null;
+    	Integer G = null;
+    	try {
+    		T = Integer.parseInt(txtT.getText());
+    		G = Integer.parseInt(txtG.getText());
+    	} catch(NumberFormatException e) {
+    		txtResult.appendText("Inserire valori numerici positivi!");
+    		return;
+    	}
+    	if(T <= 0 || G <= 0) {
+    		txtResult.appendText("Inserire valori numerici positivi maggiori di zero!");
+    		return;
+    	}
+    	
+    	List<StatoTuristi> result = this.model.simula(T, G, state);
+    	Integer somma = 0;
+    	for(StatoTuristi st : result) {
+    		txtResult.appendText(st.toString()+"\n");
+    		somma += st.getTuristi();
+    	}
+    		
+    	txtResult.appendText("\n"+somma+"\n");
     }
 
     @FXML
     void doVisualizzaVelivoli(ActionEvent event) {
-
+    	txtResult.clear();
+    	String state = cmbBoxStati.getValue();
+    	if(state == null) {
+    		txtResult.appendText("Selezionare uno stato!");
+    		return;
+    	}
+    	
+    	List<Adiacenza> result = this.model.getAdicenze(state);
+    	txtResult.appendText("Adiacenti dello stato "+state+"\n");
+    	for(Adiacenza a : result) {
+    		txtResult.appendText(a.toString()+"\n");
+    	}
+    	
     }
     
     public void setModel(Model model) {
