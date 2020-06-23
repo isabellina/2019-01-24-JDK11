@@ -8,6 +8,9 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.extflightdelays.model.Model;
+import it.polito.tdp.extflightdelays.model.StatiPeso;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -47,7 +50,14 @@ public class ExtFlightDelaysController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-
+    	
+    	this.model.creaGrafo();
+         txtResult.appendText("A" + this.model.nArchi() + "\n");
+         txtResult.appendText("V" + this.model.nVertici() + "\n");
+         
+         ObservableList<String> ciau = FXCollections.observableList(this.model.getVertici());
+         cmbBoxStati.setItems(ciau);
+         cmbBoxStati.setValue(ciau.get(0));
     }
 
     @FXML
@@ -57,7 +67,11 @@ public class ExtFlightDelaysController {
 
     @FXML
     void doVisualizzaVelivoli(ActionEvent event) {
-
+      for(StatiPeso p : this.model.getStatiAdiacenti(cmbBoxStati.getValue())){
+    	  txtResult.appendText(p.toString());
+    	  
+      }
+       
     }
     
     public void setModel(Model model) {

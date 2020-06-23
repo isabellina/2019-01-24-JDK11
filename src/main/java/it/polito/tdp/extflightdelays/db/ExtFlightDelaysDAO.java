@@ -10,6 +10,7 @@ import java.util.List;
 
 import it.polito.tdp.extflightdelays.model.Airline;
 import it.polito.tdp.extflightdelays.model.Airport;
+import it.polito.tdp.extflightdelays.model.Arco;
 import it.polito.tdp.extflightdelays.model.Flight;
 
 public class ExtFlightDelaysDAO {
@@ -115,4 +116,69 @@ public class ExtFlightDelaysDAO {
 			throw new RuntimeException("Error Connection Database");
 		}
 	}
+	
+	public List<String> getVertici(){
+		String sql = "select  distinct a.`STATE`as stato " + 
+				"from airports as a " + 
+				"where a.`COUNTRY`='USA' " + 
+				"order by a.`STATE` ASC " ;
+		
+		
+		List<String> result = new LinkedList<String>();
+
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				
+				result.add(rs.getString("stato"));
+			}
+
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+	}
+	
+	public List<Arco> getArchi(){
+		String sql = "select distinct  a.`STATE`as a1 ,  a1.`STATE`as a2 , count(distinct f.`TAIL_NUMBER`) as cnt " + 
+				"from airports as a,  airports as a1, flights as f, flights as f1 " + 
+				"where a.`ID`!=a1.`ID` and a.`ID`= f.`ORIGIN_AIRPORT_ID` and a1.`ID`=f1.`DESTINATION_AIRPORT_ID` and " + 
+				"f.`ID` = f1.`ID` " + 
+				"group by a.`STATE` ,  a1.`STATE` " ;
+		
+		List<Arco> result = new LinkedList<Arco>();
+
+		try {
+			Connection conn = ConnectDB.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				
+				Arco a = new Arco(rs.getString("a1"),rs.getString("a2"), rs.getInt("cnt"));
+				result.add(a);
+				
+			}
+
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+		
+	}
+	
+	
+	
+	
 }
